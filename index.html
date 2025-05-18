@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Currency Converter</title>
+    <style>
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  font-weight: 300;
+  margin-left: 10px;
+}
+
+.container {
+  max-width: 500px;
+  margin: 30px auto;
+  padding: 20px;
+}
+
+.edit-mode {
+  color: #ccc;
+}
+
+/* Form & Input */
+.form-input {
+  width: 100%;
+  font-size: 18px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+}
+
+.form-input-filter {
+  margin-top: 20px;
+  width: 100%;
+  font-size: 18px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: none;
+  border-bottom: 1px solid #ccc;
+  background: transparent;
+  outline: none;
+}
+
+/* Buttons */
+.btn {
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #444;
+}
+
+.btn-link {
+  font-size: 16px;
+  background-color: transparent;
+  color: #333;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.btn-clear {
+  margin-top: 20px;
+  width: 100%;
+  font-size: 16px;
+  background-color: transparent;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.btn-clear:hover {
+  background-color: #f1f1f1;
+}
+
+.text-red {
+  color: red;
+}
+
+/* Items */
+
+.items {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.items li {
+  display: flex;
+  justify-content: space-between;
+  width: 45%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px 15px;
+  margin: 0 5px 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 500px) {
+  .items li {
+    width: 100%;
+  }
+}
+
+.rate-line {
+  display: none; /* initially hidden */
+  /* rest of your styles */
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  background-color: #000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.1rem;
+  color: #00e5ff;
+  font-weight: 700;
+  user-select: none;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 0 8px #00e5ffaa;
+}
+
+.rates-subline {
+  margin-top: 0.25rem;           /* small gap below result */
+  font-size: 0.85rem;            /* smaller text */
+  color: #aaa;                   /* lighter, subtle color */
+  background-color: transparent; /* no black bg, just text */
+  box-shadow: none;              /* no shadow */
+  border: none;                  /* no border */
+  padding: 0;                    /* less padding */
+}
+
+#conversion-rates {
+  display: flex;
+  justify-content: space-between; /* push children to edges */
+  align-items: center;
+
+  width: 100%;
+  max-width: 500px; /* or same as container */
+  padding: 0.5rem 1rem;
+  background-color: #000;
+  color: #f0f0f0;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin: 1rem auto 0;
+}
+
+#conversion-rates span {
+  /* Remove any margin or padding here to ensure they stick to edges */
+  margin: 0;
+  padding: 0;
+}
+
+
+#conversion-rates span {
+  flex: 1;
+  text-align: center;
+}
+    </style>
+
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <img src="note.png" alt="" />
+        <h1>Currency Converter</h1>
+      </header>
+      <form id="item-form">
+        <div class="form-control">
+          <input
+            type="text"
+            class="form-input"
+            id="item-input"
+            name="item"
+            placeholder="Enter Value"
+          />
+        </div>
+        <select id = "priority-input" name = "currency" class = "form-input">
+          <option value = "0">Current Currency</option>
+          <option value = "1">INR</option>
+          <option value = "2">USD</option>
+          <option value = "3">Dong</option> 
+        </select>
+
+
+        <div class="form-control">
+          <button type="submit" class="btn">
+            <i class="fa-solid fa-plus"></i> Convert
+          </button>
+        </div>
+      </form>
+
+   <div id="output" class="rate-line">
+  <span id="left-rate"></span>
+  <span id="right-rate"></span>
+</div>
+
+
+<div class="rate-line">
+  <span id="left-rate" class="rate-item">…</span>
+  <!-- filler element here -->
+  <span id="right-rate" class="rate-item">…</span>
+</div>
+
+<div id="conversion-rates" class="rate-line rates-subline" style="display:none;">
+  <span id="rate1-info"></span>
+  <span id="rate2-info"></span>
+</div>
+
+<script>
+  const currency_input = document.getElementById('item-input');
+  const current_currency = document.getElementById('priority-input');
+  const convert_currency = document.getElementById('priority-output');
+  const submit = document.querySelector('.btn');
+  
+  const arr = [
+      {
+          "current" : "USD",
+          "convert1" : "INR",
+          "rate1" : "86.40",
+          "convert2" : "Dong",
+          "rate2" : "25921.50"
+  
+      },
+      
+      {
+           "current" : "INR",
+          "convert1" : "USD",
+          "rate1" : "0.012",
+          "convert2" : "Dong",
+          "rate2" : "302.82"
+      },
+  
+       {
+           "current" : "Dong",
+          "convert1" : "INR",
+          "rate1" : "0.0033",
+          "convert2" : "USD",
+          "rate2" : "0.000039"
+      }
+  ]
+  
+  
+  let value;
+  let current;
+  let input;
+  
+  
+  function getValue()
+  {
+       input = currency_input.value;
+      if(isNaN(input))
+      {
+         alert("Enter a number not alphabet");
+      }
+      else{
+          return input;
+      }
+  }
+  
+  function getCurrentInput()
+  {
+      input = current_currency.value;
+      if(input === "1")
+      {
+          return 'INR';
+      }
+      else if(input === "2")
+      {
+          return 'USD';
+      }
+     else{
+      return 'Dong';
+     }
+  }
+  
+  
+  function getAnswer()
+  {
+  
+      const data = arr;
+      const rateObj = findRate(data , current);
+      display(rateObj , value);
+   
+  }
+  
+  function display(rateObj, val) {
+    const rateLine        = document.querySelector('.rate-line');
+    const conversionRates = document.getElementById('conversion-rates');
+    const leftRateSpan    = document.getElementById('left-rate');
+    const rightRateSpan   = document.getElementById('right-rate');
+    const rate1InfoSpan   = document.getElementById('rate1-info');
+    const rate2InfoSpan   = document.getElementById('rate2-info');
+  
+    if (val && rateObj) {
+      // show the containers
+      rateLine.style.display        = 'flex';
+      conversionRates.style.display = 'flex';
+  
+      // 1. Calculate raw converted amounts
+      const raw1 = Number(rateObj.rate1) * val;
+      const raw2 = Number(rateObj.rate2) * val;
+  
+      // 2. Format with Indian‑style commas and 2 decimals
+      const formatted1 = raw1.toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      const formatted2 = raw2.toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+  
+      // 3. Update the left & right rate display
+      leftRateSpan.textContent  = `${rateObj.convert1} : ${formatted1}`;
+      rightRateSpan.textContent = `${rateObj.convert2} : ${formatted2}`;
+  
+      // 4. Format the “1 unit = rate” info lines to 5 decimal places
+      const info1 = Number(rateObj.rate1).toLocaleString('en-IN', {
+        minimumFractionDigits: 5,
+        maximumFractionDigits: 5
+      });
+      const info2 = Number(rateObj.rate2).toLocaleString('en-IN', {
+        minimumFractionDigits: 5,
+        maximumFractionDigits: 5
+      });
+      rate1InfoSpan.textContent = `1 ${rateObj.current} = ${info1} ${rateObj.convert1}`;
+      rate2InfoSpan.textContent = `1 ${rateObj.current} = ${info2} ${rateObj.convert2}`;
+  
+      // 5. Ensure both spans carry 'rate-item' for coloring
+      leftRateSpan.classList.add('rate-item');
+      rightRateSpan.classList.add('rate-item');
+  
+      // 6. Apply distinct colors: first cyan, second amber
+      document.querySelectorAll('.rate-item').forEach((el, idx) => {
+        el.style.color = idx % 2 === 0 ? '#00e5ff' : '#ffb300';
+      });
+  
+    } else {
+      // hide if no valid input
+      rateLine.style.display        = 'none';
+      conversionRates.style.display = 'none';
+    }
+  }
+  
+  
+  function findRate(ratesArr , from)
+  {
+      return ratesArr.find(r =>
+      r.current === from 
+    ) || null;
+  }
+  function test(e)
+  {
+      e.preventDefault();
+      if(current_currency.value === "0")
+      {
+          alert("Select a currency");
+      }
+       if(currency_input.value == 0)
+      {
+          alert("Put a value");
+      }
+      else
+      {
+       value = getValue();
+      current = getCurrentInput();
+      getAnswer();
+      }
+  }
+  
+  submit.addEventListener('click' , test);
+  </script>
+
+  </body>
+</html>
