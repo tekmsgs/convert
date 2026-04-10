@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FX Converter</title>
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="FX Converter">
+
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+
+<style>
+  body { margin:0; font-family:-apple-system, sans-serif; background:#ffffff; color:#1c1c1e; }
+
+  .container {
+    max-width:420px;
+    margin:20px auto;
+    padding:16px;
+    border:2px solid #9fbc8a;
+    border-radius:20px;
+    background:#C7EABB;
+  }
+
+  .card {
+    background:#C7EABB;
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:14px;
+    border:1px solid #9fbc8a;
+  }
+
+  .active {
+    background:#FFC300;
+    border-color:#FFC300;
+  }
+
+  .label { font-size:11px; font-weight:bold; color:#3a3a3c; }
+
+  .value {
+    font-size:28px;
+    text-align:right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rates { display:flex; gap:10px; margin-bottom:12px; }
+
+  .rates input {
+    flex:1;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #9fbc8a;
+    background:#81E7AF;
+    color:#1c1c1e;
+  }
+
+  .rates input::placeholder {
+    color:#1c1c1e;
+  }
+
+  .keypad {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+  }
+
+  .key {
+    padding:18px;
+    text-align:center;
+    border-radius:14px;
+    background:#A2CB8B;
+    font-size:20px;
+    color:#1c1c1e;
+  }
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="card active" id="INR_box" onclick="setActive('INR')">
+    <div class="label">INR</div>
+    <div class="value" id="INR_val">0</div>
+  </div>
+
+  <div class="card" id="SCR_box" onclick="setActive('SCR')">
+    <div class="label">SCR</div>
+    <div class="value" id="SCR_val">0</div>
+  </div>
+
+  <div class="card" id="D_box" onclick="setActive('D')">
+    <div class="label">
+      <select id="currency">
+        <option value="EUR">EUR</option>
+        <option value="USD">USD</option>
+      </select>
+    </div>
+    <div class="value" id="D_val">0</div>
+  </div>
+
+  <div class="rates">
+    <input id="rate_INR" onclick="setRate('INR')" placeholder="Enter Rate 1 EUR = INR" type="text">
+    <input id="rate_SCR" onclick="setRate('SCR')" placeholder="Enter Rate 1 EUR = SCR" type="text">
+  </div>
+
+  <div class="keypad" id="keypad"></div>
+
+</div>
+
+<script>
+let active = 'INR';
+let activeRate = null;
+let values = { INR:'', SCR:'', D:'' };
+const MAX_LEN = 10;
+
+function setActive(k){
+  active = k;
+  activeRate = null;
+  values[k] = '';
+  updateUI();
+}
+
+function setRate(k){
+  activeRate = k;
+}
+
+function bankRound(num){
+  let f = Math.floor(num * 100) / 100;
+  let diff = num*100 - Math.floor(num*100);
+  if(diff > 0.5) return (Math.ceil(num*100)/100).toFixed(2);
+  if(diff < 0.5) return f.toFixed(2);
+  return (Math.floor(num*100)%2===0 ? f : (f+0.01)).toFixed(2);
+}
+
+function format(numStr){
+  if(numStr === '' || numStr === undefined) return '0';
+  let num = Number(numStr);
+  if(isNaN(num)) return numStr;
+  return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function compute(){
+  let rH = parseFloat(document.getElementById('rate_INR').value);
+  let rV = parseFloat(document.getElementById('rate_SCR').value);
+  if(!rH || !rV) return;
+  if(values[active]==='' || values[active]==='.') return;
+
+  let H = parseFloat(values.INR || 0);
+  let V = parseFloat(values.SCR || 0);
+  let D = parseFloat(values.D || 0);
+
+  if(active==='INR'){ D = H / rH; V = D * rV; }
+  if(active==='SCR'){ D = V / rV; H = D * rH; }
+  if(active==='D'){ H = D * rH; V = D * rV; }
+
+  if(active==='INR'){
+    values.SCR = bankRound(V);
+    values.D = bankRound(D);
+  }
+  if(active==='SCR'){
+    values.INR = bankRound(H);
+    values.D = bankRound(D);
+  }
+  if(active==='D'){
+    values.INR = bankRound(H);
+    values.SCR = bankRound(V);
+  }
+}
+
+function updateUI(){
+  ['INR','SCR','D'].forEach(k=>{
+    document.getElementById(k+'_box').classList.remove('active');
+  });
+  document.getElementById(active+'_box').classList.add('active');
+
+  document.getElementById('INR_val').innerText = active==='INR' ? (values.INR || '0') : format(values.INR);
+  document.getElementById('SCR_val').innerText = active==='SCR' ? (values.SCR || '0') : format(values.SCR);
+  document.getElementById('D_val').innerText = active==='D' ? (values.D || '0') : format(values.D);
+}
+
+function press(k){
+  if(k==='C'){
+    values={INR:'',SCR:'',D:''};
+    document.getElementById('rate_INR').value = '';
+    document.getElementById('rate_SCR').value = '';
+    updateUI();
+    return;
+  }
+
+  // RATE INPUT MODE
+  if(activeRate){
+    let el = document.getElementById('rate_' + activeRate);
+
+    if(k==='.' && el.value.includes('.')) return;
+    if(k==='.' && el.value==='') el.value='0';
+
+    el.value += k;
+    return;
+  }
+
+  // NORMAL MODE
+  if(values[active].length>=MAX_LEN) return;
+  if(k==='.' && values[active].includes('.')) return;
+
+  if(k==='.' && values[active]==='') values[active]='0';
+
+  values[active]+=k;
+
+  compute();
+  updateUI();
+}
+
+const keys = ['7','8','9','4','5','6','1','2','3','.','0','C'];
+const pad = document.getElementById('keypad');
+
+keys.forEach(k=>{
+  let d=document.createElement('div');
+  d.className='key';
+  d.innerText=k;
+  d.onclick=()=>press(k);
+  pad.appendChild(d);
+});
+</script>
+
+</body>
+</html>
