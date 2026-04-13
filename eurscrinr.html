@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>FX Converter</title>
 
@@ -46,13 +47,22 @@
 
   .rates { display:flex; gap:10px; margin-bottom:12px; }
 
+  .rate-group { display:flex; flex-direction:column; gap:4px; flex:1; }
+
+  .rate-label { font-size:11px; font-weight:bold; color:#3a3a3c; }
+
   .rates input {
     flex:1;
+    min-width:0;
     padding:10px;
     border-radius:10px;
     border:1px solid #9fbc8a;
     background:#81E7AF;
     color:#1c1c1e;
+  }
+
+  .rates input.rate-active {
+    border:2px solid #FFC300;
   }
 
   .rates input::placeholder {
@@ -100,8 +110,14 @@
   </div>
 
   <div class="rates">
-    <input id="rate_INR" onclick="setRate('INR')" placeholder="Enter Rate 1 EUR = INR" type="text">
-    <input id="rate_SCR" onclick="setRate('SCR')" placeholder="Enter Rate 1 EUR = SCR" type="text">
+    <div class="rate-group">
+      <span class="rate-label">EUR/INR</span>
+      <input id="rate_INR" onclick="setRate('INR')" placeholder="Enter Rate 1 EUR = INR" type="text" inputmode="none" readonly>
+    </div>
+    <div class="rate-group">
+      <span class="rate-label">EUR/SCR</span>
+      <input id="rate_SCR" onclick="setRate('SCR')" placeholder="Enter Rate 1 EUR = SCR" type="text" inputmode="none" readonly>
+    </div>
   </div>
 
   <div class="keypad" id="keypad"></div>
@@ -115,14 +131,29 @@ let values = { INR:'', SCR:'', D:'' };
 const MAX_LEN = 10;
 
 function setActive(k){
+  if(activeRate){
+    let el = document.getElementById('rate_' + activeRate);
+    if(el.value === '') el.placeholder = ratePlaceholders[activeRate];
+    el.classList.remove('rate-active');
+    activeRate = null;
+  }
   active = k;
-  activeRate = null;
   values[k] = '';
   updateUI();
 }
 
+const ratePlaceholders = { INR: 'Enter Rate 1 EUR = INR', SCR: 'Enter Rate 1 EUR = SCR Rate' };
+
 function setRate(k){
+  if(activeRate && activeRate !== k){
+    let prev = document.getElementById('rate_' + activeRate);
+    if(prev.value === '') prev.placeholder = ratePlaceholders[activeRate];
+    prev.classList.remove('rate-active');
+  }
   activeRate = k;
+  let el = document.getElementById('rate_' + k);
+  el.placeholder = '';
+  el.classList.add('rate-active');
 }
 
 function bankRound(num){
@@ -181,10 +212,13 @@ function updateUI(){
 
 function press(k){
   if(k==='C'){
-    values={INR:'',SCR:'',D:''};
-    document.getElementById('rate_INR').value = '';
-    document.getElementById('rate_SCR').value = '';
-    updateUI();
+    if(activeRate){
+      document.getElementById('rate_' + activeRate).value = '';
+      localStorage.removeItem('rate_' + activeRate);
+    } else {
+      values={INR:'',SCR:'',D:''};
+      updateUI();
+    }
     return;
   }
 
@@ -196,6 +230,7 @@ function press(k){
     if(k==='.' && el.value==='') el.value='0';
 
     el.value += k;
+    localStorage.setItem('rate_' + activeRate, el.value);
     return;
   }
 
@@ -210,6 +245,12 @@ function press(k){
   compute();
   updateUI();
 }
+
+// Restore saved rates
+['INR','SCR'].forEach(k=>{
+  let saved = localStorage.getItem('rate_' + k);
+  if(saved) document.getElementById('rate_' + k).value = saved;
+});
 
 const keys = ['7','8','9','4','5','6','1','2','3','.','0','C'];
 const pad = document.getElementById('keypad');
