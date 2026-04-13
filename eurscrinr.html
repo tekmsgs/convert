@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>FX Converter</title>
 
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -245,14 +245,6 @@ function press(k){
   compute();
   updateUI();
 }
-
-// Prevent iOS zoom on rate inputs by blocking native focus via touch
-['INR','SCR'].forEach(k=>{
-  document.getElementById('rate_'+k).addEventListener('touchstart', function(e){
-    e.preventDefault();
-    setRate(k);
-  });
-});
 
 // Restore saved rates
 ['INR','SCR'].forEach(k=>{
