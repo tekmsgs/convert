@@ -246,6 +246,14 @@ function press(k){
   updateUI();
 }
 
+// Prevent iOS zoom on rate inputs by blocking native focus via touch
+['INR','SCR'].forEach(k=>{
+  document.getElementById('rate_'+k).addEventListener('touchstart', function(e){
+    e.preventDefault();
+    setRate(k);
+  });
+});
+
 // Restore saved rates
 ['INR','SCR'].forEach(k=>{
   let saved = localStorage.getItem('rate_' + k);
